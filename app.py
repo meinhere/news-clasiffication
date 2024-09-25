@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 
 # praproses
 import pandas as pd
-import numpy as np
 import re
 import pickle
 import nltk
