@@ -201,12 +201,12 @@ def show_home():
 def show_crawling():
     st.title("Crawling Berita")
 
-    # --------------- Crawling Data -----------------
-    # data_df = crawl()
+    # Load data
+    main_df = pd.read_csv("dataset/data_berita.csv", delimiter=",")
 
-    st.write("Data yang tersedia:")
-    # st.write(data_df)
-
+    st.subheader("Data yang didapat setelah proses crawling:")
+    st.write(main_df)
+    st.write(f"Jumlah baris: {main_df.shape[0]} - Jumlah Kolom: {main_df.shape[1]}")
 
 def show_preprocessing():
     st.title("Preprocessing Data")
@@ -214,7 +214,7 @@ def show_preprocessing():
     # --------------- Load Data -----------------
     main_df = pd.read_csv("dataset/data_berita.csv", delimiter=",")
 
-    st.write("Data yang tersedia:")
+    st.write("### Data yang tersedia:")
     st.write(main_df.head())
 
     # --------------- Merubah Data ke Bentuk Lowercase -----------------
@@ -259,7 +259,7 @@ def show_creating():
     vectorizer = TfidfVectorizer()
     corpus = main_df['desc_clean_stem'].tolist()
     tfidf = vectorizer.fit_transform(corpus)
-    st.write("Jumlah Baris :", tfidf.shape[0], " --- Jumlah Kolom : ", tfidf.shape[1])
+    st.write("Jumlah Baris :", tfidf.shape[0], " - Jumlah Kolom : ", tfidf.shape[1])
 
     # creating vsm 
     st.write("### Data setelah pembentukan VSM")
