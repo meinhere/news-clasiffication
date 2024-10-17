@@ -330,7 +330,7 @@ def show_modeling():
 def show_testing():
     labels_encode = {
         1: ":blue[OTOMOTIF]",
-        0: ":yellow[MONEY]",
+        0: ":red[MONEY]",
     }
 
     st.title("Prediksi Kategori Berita Online")
@@ -338,8 +338,11 @@ def show_testing():
     st.write("Masukan Link Berita dari website KOMPAS")
     link_news = st.text_input("Link Berita [Kategori MONEY | OTOMOTIF]")
     # create dataframe
+    link_news = get_content(link_news)
     data = [{ "Isi Berita" : link_news }]
     test_df = pd.DataFrame(data)
+
+    st.write(test_df)
     
     check= st.button("Prediksi")
 
