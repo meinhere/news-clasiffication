@@ -254,56 +254,82 @@ def show_creating():
     # load data
     main_df = st.session_state['preprocessed_data']
 
+    # Splitting data
+    st.write("### Split Data Train dan Test")
+    X = main_df['desc_clean_stem']
+    y = main_df['Kategori Berita']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    train_df = pd.DataFrame({'desc_clean_stem': X_train, 'label': y_train})
+    test_df = pd.DataFrame({'desc_clean_stem': X_test, 'label': y_test})
+
+    st.write("Jumlah Data Train: ", train_df.shape[0])
+    st.write("Jumlah Data Test: ", test_df.shape[0])
+
     # fitting words to tfidf
     st.write("### Ukuran Shape setelah TfidfVectorizer")
     vectorizer = TfidfVectorizer()
-    corpus = main_df['desc_clean_stem'].tolist()
+    corpus = train_df['desc_clean_stem'].tolist()
     tfidf = vectorizer.fit_transform(corpus)
-    st.write("Jumlah Baris :", tfidf.shape[0], " - Jumlah Kolom : ", tfidf.shape[1])
 
     # creating vsm 
     st.write("### Data setelah pembentukan VSM")
     vocabulary = vectorizer.get_feature_names_out().tolist()
-    tfidf_df = pd.DataFrame(tfidf.toarray(), columns=vocabulary)
-    tfidf_df.insert(0, 'Kategori Berita', main_df['Kategori Berita'])
-    st.write(tfidf_df)
+    train_tfidf_df = pd.DataFrame(tfidf.toarray(), columns=vocabulary)
+    train_tfidf_df['label'] = train_df['label'].tolist()
+    st.write("#### Data Train")
+    st.write("Jumlah Baris :", train_tfidf_df.shape[0], " - Jumlah Kolom : ", train_tfidf_df.shape[1])
+    st.write(train_tfidf_df.head())
+
+    filename = 'model/tfidf_vectorizer.sav'
+    vectorizer = pickle.load(open(filename, 'rb'))
+    test = test_df['desc_clean_stem']
+    vocabulary = vectorizer.get_feature_names_out().tolist()
+    tfidf = vectorizer.transform(test)
+    test_tfidf_df = pd.DataFrame(tfidf.toarray(), columns=vocabulary)
+    test_tfidf_df['label'] = test_df['label'].tolist()
+    st.write("#### Data Test")
+    st.write("Jumlah Baris :", test_tfidf_df.shape[0], " - Jumlah Kolom : ", test_tfidf_df.shape[1])
+    st.write(test_tfidf_df.head())
 
     # Encoding Label
-    st.write("### Data setelah Encoding Label Kategori Berita")
+    st.write("### Data setelah Encoding Label")
     label_encoder = preprocessing.LabelEncoder()
-    tfidf_df['Kategori Berita']= label_encoder.fit_transform(tfidf_df['Kategori Berita'])
-    st.write(tfidf_df)
+    train_tfidf_df['label']= label_encoder.fit_transform(train_tfidf_df['label'])
+    st.write("#### Data Train")
+    st.write(train_tfidf_df.head())
 
-    st.session_state['tfidf_data'] = tfidf_df
+    test_tfidf_df['label']= label_encoder.fit_transform(test_tfidf_df['label'])
+    st.write("#### Data Test")
+    st.write(test_tfidf_df.head())
+
+    st.session_state['train_tfidf_df'] = train_tfidf_df
+    st.session_state['test_tfidf_df'] = test_tfidf_df
 
 def show_modeling():
     st.title("Modeling")
     
-    if 'tfidf_data' not in st.session_state:
+    if 'train_tfidf_df' not in st.session_state and 'test_tfidf_df' not in st.session_state:
         st.write("Silakan lakukan proses pembuatan vsm data terlebih dahulu.")
         return
     
     # load data
-    main_df = st.session_state['tfidf_data']
-    st.write("Data dalam bentuk VSM")
-    st.write(main_df.head())
+    train_tfidf_df = st.session_state['train_tfidf_df']
+    st.write("Data Train")
+    st.write(train_tfidf_df.head())
 
-    # split data untuk data feature dan data target
-    st.write('### Splitting Data')
-    X = main_df.drop(['Kategori Berita'], axis=1)
-    y = main_df['Kategori Berita']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2)
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("#### Data Training")
-        st.write(X.head())
-
-    with col2:
-        st.write("#### Data Label")
-        st.write(y.head())
+    # data test
+    test_tfidf_df = st.session_state['test_tfidf_df']
+    st.write("Data Test")
+    st.write(test_tfidf_df.head())
 
     # fit model untuk training
+    X_train = train_tfidf_df.drop('label', axis=1)
+    y_train = train_tfidf_df['label']
+
+    X_test = test_tfidf_df.drop('label', axis=1)
+    y_test = test_tfidf_df['label']
+
     lr_model = LogisticRegression()
     lr_model.fit(X_train, y_train)
 
@@ -336,17 +362,16 @@ def show_testing():
     st.title("Prediksi Kategori Berita Online")
 
     st.write("Masukan Link Berita dari website KOMPAS")
-    link_news = st.text_input("Link Berita [Kategori MONEY | OTOMOTIF]")
-    # create dataframe
-    link_news = get_content(link_news)
-    data = [{ "Isi Berita" : link_news }]
-    test_df = pd.DataFrame(data)
-
-    st.write(test_df)
+    link_news = st.text_input("Link Judul Berita [Kategori MONEY | OTOMOTIF]")
     
     check= st.button("Prediksi")
 
-    if check and data[0]['Isi Berita'] != "":
+    if check and link_news != "":
+        # create dataframe
+        link_news = get_content(link_news)
+        data = [{ "Isi Berita" : link_news }]
+        test_df = pd.DataFrame(data)
+
         # preprocessing text
         test_df['lwr'] = test_df['Isi Berita'].apply(clean_lower)
         test_df['clean_punct'] = test_df['lwr'].apply(clean_punct)
