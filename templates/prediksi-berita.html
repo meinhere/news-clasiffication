@@ -1,0 +1,33 @@
+{% extends 'index.html' %} {% block title %}
+<h1>Prediksi Kategori Berita (SVD) Website Kompas</h1>
+{% endblock %} {% block body %}
+
+<p>
+  Masukkan link berita dari
+  <a
+    href="https://kompas.com/"
+    style="color: skyblue; text-decoration: underline"
+    >Kompas</a
+  >
+  untuk mengetahui kategori berita tersebut dengan proses yang dilakukan
+  menggunakan bentuk Singular Value Decomposition (SVD). Kategori berita yang
+  tersedia adalah <b>OTOMOTIF</b> dan <b>MONEY</b>.
+</p>
+
+<form method="post" action="{{ url_for('prediksi_berita') }}">
+  <label for="url_prediksi">Masukkan link Berita:</label><br />
+  <input
+    type="text"
+    class="url"
+    name="url_prediksi"
+    oninput="checkInput()"
+    style="width: 100%"
+    value="{{ url }}"
+  /><br /><br />
+  <button class="button" type="submit">Prediksi</button>
+</form>
+
+{% if prediksi %}
+<p><b>Judul Berita:</b> <a href="{{ url }}" target="_blank">{{ judul }}</a></p>
+<p><b>Prediksi:</b> {{ prediksi }}</p>
+{% endif %} {% endblock %}

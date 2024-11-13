@@ -1,0 +1,39 @@
+{% extends 'index.html' %} {% block title %}
+<h1>Ringkasan Berita</h1>
+{% endblock %} {% block body %}
+
+<p>
+  Ringkasan Berita dengan hasil ringkasan dari beberapa kalimat pada berita (no
+  AI).
+</p>
+
+<form method="post" action="{{ url_for('ringkasan_berita') }}">
+  <label for="ringkasan">Masukkan link Berita:</label><br />
+  <input
+    type="text"
+    class="url"
+    name="ringkasan"
+    oninput="checkInput()"
+    value="{{ url }}"
+    style="width: 100%"
+  /><br /><br />
+  <label for="centrality">Pilih Centrality:</label><br />
+  <select name="centrality" id="centrality">
+    <option value="degree" {% if centrality == 'degree' %}selected{% endif %}>Degree Centrality</option>
+    <option value="closeness" {% if centrality == 'closeness' %}selected{% endif %}>Closeness Centrality</option>
+    <option value="betweenness" {% if centrality == 'betweenness' %}selected{% endif %}>Betweenness Centrality</option>
+    <option value="eigenvector" {% if centrality == 'eigenvector' %}selected{% endif %}>Eigenvector Centrality</option>
+    <option value="pagerank" {% if centrality == 'pagerank' %}selected{% endif %}>PageRank</option>
+  </select>
+  <br /><br />
+  <button class="button" type="submit">Ringkas</button>
+</form>
+
+{% if ringkasan %}
+<p><b>Judul Berita:</b> <a href="{{ url }}" target="_blank">{{ judul }}</a></p>
+<p><b>Dengan menggunakan:</b> {{ centrality }}</p>
+<p><b>Ringkasan:</b> {{ ringkasan }}</p>
+
+<img src="{{ path }}\{{ images }}" alt="centrality images">
+{% endif %} {% endblock %}
+

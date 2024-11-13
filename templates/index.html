@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prediksi Kategori Berita - News Classification</title>
+    <link
+      rel="icon"
+      href="https://img.icons8.com/?size=100&id=65344&format=png&color=000000"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+
+    <script>
+      function checkInput() {
+        var input = document.getElementById("url_kompas");
+        if (input.value.trim() !== "") {
+          input.classList.add("not-empty");
+        } else {
+          input.classList.remove("not-empty");
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div
+      class="nav_bar"
+      style="display: flex; flex-direction: row; justify-content: space-between"
+    >
+      <div>
+        <a href="{{ url_for('prediksi_berita') }}">Prediksi Berita (SVD)</a>
+        <a href="{{ url_for('ringkasan_berita') }}">Ringkasan Berita</a>
+        <a href="{{ url_for('ringkasan_text') }}">Ringkasan Text</a>
+      </div>
+      <div>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('about') }}">About</a>
+      </div>
+    </div>
+    <div class="main">
+      {% block title %}
+
+      <h1>Prediksi Kategori Berita (VSM) Website Kompas</h1>
+
+      {% endblock %} {% block body %}
+
+      <p>
+        Masukkan link berita dari
+        <a
+          href="https://kompas.com/"
+          style="color: skyblue; text-decoration: underline"
+          >Kompas</a
+        >
+        untuk mengetahui kategori berita tersebut dengan proses yang dilakukan
+        menggunakan bentuk Vector Space Model (VSM). Kategori berita yang
+        tersedia adalah <b>OTOMOTIF</b> dan <b>MONEY</b>.
+      </p>
+
+      <form method="post" action="{{ url_for('index') }}">
+        <label for="url_kompas">Link Berita:</label><br />
+        <input
+          type="text"
+          class="url"
+          name="url_kompas"
+          id="url_kompas"
+          oninput="checkInput()"
+          value="{{ url }}"
+          style="width: 100%"
+        /><br /><br />
+        <button class="button" type="submit">Prediksi</button>
+      </form>
+
+      {% if prediksi %}
+      <p>
+        <b>Judul Berita:</b> <a href="{{ url }}" target="_blank">{{ judul }}</a>
+      </p>
+      <p><b>Prediksi:</b> {{ prediksi }}</p>
+      {% endif %}
+
+      <br /><br />
+      {% endblock %}
+    </div>
+
+    <script>
+      if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+      }
+    </script>
+  </body>
+</html>
