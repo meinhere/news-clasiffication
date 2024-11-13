@@ -7,9 +7,9 @@ import pandas as pd
 import re
 import pickle
 import nltk
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('punkt')
+# nltk.download('stopwords')
+# nltk.download('wordnet')
+# nltk.download('punkt')
 from nltk.corpus import stopwords
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
