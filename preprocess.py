@@ -21,6 +21,8 @@ import os
 # Library untuk text vectorization & Similarity
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
+import io
+import base64
 
 
 # Cleaning text Berita
@@ -210,20 +212,29 @@ def sorted_result(node, kalimat, total=3):
 	return ringkasan
 
 def plot_graph(G):
-	"""
-	Plotting graph dan menyimpan ke file lokal
-	"""
-	plt.figure(figsize=(12, 8))
-	pos = nx.spring_layout(G)
-	nx.draw(G, pos, with_labels=True, node_color='skyblue', edge_color='gray', node_size=2000, font_size=15, font_color='black', font_weight='bold')
-	plt.title("Graph Visualization")
+		"""
+		Plotting graph dan mengembalikan HTML untuk ditampilkan
+		"""
+		plt.figure(figsize=(12, 8))
+		pos = nx.spring_layout(G)
+		nx.draw(G, pos, with_labels=True, node_color='skyblue', edge_color='gray', node_size=2000, font_size=15, font_color='black', font_weight='bold')
+		plt.title("Graph Visualization")
 
-	# Save plot to a file
-	plt.savefig('graph_visualization.png')
-	plt.close()
+		nx.draw_networkx_labels(G, pos)
 
-	return 'graph_visualization.png'
+		# Save plot to a bytes buffer
+		buf = io.BytesIO()
+		plt.savefig(buf, format='png')
+		buf.seek(0)
 
+		# Encode the bytes to base64
+		plot_base64 = base64.b64encode(buf.read()).decode('utf-8')
+		buf.close()
+
+		# Create HTML to display the image
+		html = f'data:image/png;base64,{plot_base64}'
+		return html
+	
 
 def ringkas_berita(url: str, ctrl: str) -> str:
 	"""
@@ -240,10 +251,9 @@ def ringkas_berita(url: str, ctrl: str) -> str:
 	C = centrality(G, ctrl)
 	
 	result = sorted_result(C, preprocessed)
-	images = plot_graph(G)
-	path = os.path.abspath(os.getcwd())
+	image = plot_graph(G)
 
-	return result, judul, link, images, path
+	return result, judul, link, image
 
 def ringkas_text(text: str, ctrl: str) -> str:
 	"""
@@ -253,10 +263,10 @@ def ringkas_text(text: str, ctrl: str) -> str:
 	tfidf_vectorizer = TfidfVectorizer()
 	tfidf_matrix = tfidf_vectorizer.fit_transform(preprocessed)
 	
-	cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
-	G = network_graph(cosine_sim)
+	G = network_graph(tfidf_matrix, tfidf_vectorizer)
 	C = centrality(G, ctrl)
 	
 	result = sorted_result(C, preprocessed)
+	image = plot_graph(G)
 
-	return result
+	return result, image

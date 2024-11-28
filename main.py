@@ -71,8 +71,8 @@ def ringkasan_berita():
         url = request.form.get('ringkasan')
         ctrl = request.form.get('centrality')
         if request.method == 'POST' and url != '': 
-            rksbrt, judul, url, images, path = ringkas_berita(url, ctrl)
-            return render_template("ringkasan-berita.html", ringkasan=rksbrt, judul=judul, url=url, centrality=ctrl, images=images, path=path)
+            rksbrt, judul, url, image = ringkas_berita(url, ctrl)
+            return render_template("ringkasan-berita.html", ringkasan=rksbrt, judul=judul, url=url, centrality=ctrl, image=image)
         else:
             return render_template("ringkasan-berita.html",  ringkasan="URL tidak valid")
     else:
@@ -84,8 +84,8 @@ def ringkasan_text():
         text = request.form.get('ringkasan')
         ctrl = request.form.get('centrality')
         if request.method == 'POST' and text != '': 
-            rksbrt = ringkas_text(text, ctrl)
-            return render_template("ringkasan-text.html", ringkasan=rksbrt, centrality=ctrl, text=text)
+            rksbrt, image = ringkas_text(text, ctrl)
+            return render_template("ringkasan-text.html", ringkasan=rksbrt, centrality=ctrl, text=text, image=image)
     else:
         return render_template("ringkasan-text.html")
 
